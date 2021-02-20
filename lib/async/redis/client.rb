@@ -75,7 +75,19 @@ module Async
 			end
 			
 			def subscribe(*channels)
-				context = Context::Subscribe.new(@pool, channels)
+				context = Context::Subscribe.new(@pool, false, channels)
+				
+				return context unless block_given?
+				
+				begin
+					yield context
+				ensure
+					context.close
+				end
+			end
+			
+			def psubscribe(*channels)
+				context = Context::Subscribe.new(@pool, true, channels)
 				
 				return context unless block_given?
 				

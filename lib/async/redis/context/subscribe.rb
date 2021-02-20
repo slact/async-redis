@@ -28,10 +28,15 @@ module Async
 		module Context
 			class Subscribe < Generic
 				MESSAGE = 'message'
-				
-				def initialize(pool, channels)
+				def initialize(pool, pattern_subscribe, channels)
 					super(pool)
-					
+					if pattern_subscribe
+						@subscribe_cmd = 'PSUBSCRIBE'
+						@unsubscribe_cmd = 'PUNSUBSCRIBE'
+					else
+						@subscribe_cmd = 'SUBSCRIBE'
+						@unsubscribe_cmd = 'UNSUBSCRIBE'
+					end
 					subscribe(channels)
 				end
 				
@@ -49,12 +54,12 @@ module Async
 				end
 				
 				def subscribe(channels)
-					@connection.write_request ['SUBSCRIBE', *channels]
+					@connection.write_request [@subscribe_cmd, *channels]
 					@connection.flush
 				end
 				
 				def unsubscribe(channels)
-					@connection.write_request ['UNSUBSCRIBE', *channels]
+					@connection.write_request [@unsubscribe_cmd, *channels]
 					@connection.flush
 				end
 			end
